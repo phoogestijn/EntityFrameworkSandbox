@@ -1,8 +1,6 @@
 ﻿using System.Data;
 using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
 using System.Linq;
-using System.Transactions;
 using EntityFrameworkTest.Foundation.EF;
 using EntityFrameworkTest.Foundation.EF.Repository;
 using EntityFrameworkTest.Model;
@@ -59,16 +57,16 @@ namespace EntityFrameworkTest.Tests.Create
 
                 var a2 = ctx.Set<Arrangement>().Where(dbarr => dbarr.Id == 1).Single();
 
-                // opmerking: 
+                // opmerkingen rondom SetValues:
                 // als je niet de Id (PK) van het nieuwe Arrangement object gelijk maakt aan de bestaande PK,
                 // dan zal SetValues crashen met de melding dat je 'Id' niet mag veranderen omdat deze deel uitmaakt
                 // van de PK van (in dit geval) a2. (want 0 is niet gelijk aan de huidige PK, 1)
+                // Verder update SetValues alleen scalar properties, referenties neemt hij niet mee (die zijn geen onderdeel van CurrentValues)
                 a.Id = a2.Id;   // PK overnemen van bestaande record...
                 ctx.Entry(a2).CurrentValues.SetValues(a);      // ...en dan kun je wel alle waardes overschrijven.
 
                 ctx.SaveChanges();
 
-                Arrangement foo = ctx.Set<Arrangement>().First();
                 Assert.AreEqual(1, a.Versions.Count(), "aantal arrangementversies bij het arrangement in memory moet 1 zijn, want we hebben alles overschreven");
 
                 var versies = from ver in ctx.Set<ArrangementVersion>()  where ver.Arrangement.Id == 1 orderby ver.Version select ver;
@@ -77,7 +75,7 @@ namespace EntityFrameworkTest.Tests.Create
                 Assert.AreEqual(11, versieLijst[0].Version);
                 Assert.AreEqual(22, versieLijst[1].Version);
                 Assert.AreEqual(33, versieLijst[2].Version);
-                // hmm, wat wel vreemd is, is dat de ArrangementVersion van hierboven (9999) niet in de database verschenen is....
+                // omdat SetValues alleen scalar properties heeft bijgewerkt, is de ArrangementVersion van hierboven (9999) niet in de database verschenen.
             }
 
             using (DatabaseContext ctx = new DatabaseContext())
@@ -88,9 +86,22 @@ namespace EntityFrameworkTest.Tests.Create
 
                     Assert.AreEqual(arrangement, arrangement.Versions.First().Arrangement, "versie moet aan het enige arrangement gekoppeld zijn");
                     Assert.AreEqual(arrangement, arrangement.Versions.Last().Arrangement, "versie moet aan het enige arrangement gekoppeld zijn");
+
+                    // laten we nu proberen een nieuwe arrangement Versie toe te voegen en weer weg te halen
+                    var v = new ArrangementVersion() {Status = VersionStatus.Published, Version = 888};
+
+                    arrangement.Versions.Add(v);
+                    ctx.SaveChanges();
+
+                    arrangement.Versions.Remove(v);
+                    ctx.SaveChanges();   
+                    // @TODO de Remove crasht :-(  
+                    // "System.Data.UpdateException : A relationship from the 'Arrangement_Versions' AssociationSet is in the 'Deleted' state. Given multiplicity constraints, a corresponding 'Arrangement_Versions_Target' must also in the 'Deleted' state."
+                    // nog uitzoeken wat dan bij Code-First de handigste manier is om records uit een relatie te verwijderen ...
+
+                    Assert.AreEqual(0, ctx.Set<ArrangementVersion>().Count(), "gekoppelde aantal versies moet nu weer gelijk zijn aan het aantal versies in de database");
                 }
             }
-
         }
     }
 }
