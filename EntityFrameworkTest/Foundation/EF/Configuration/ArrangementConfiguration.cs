@@ -11,7 +11,7 @@ namespace EntityFrameworkTest.Foundation.EF.Configuration
             HasKey(e => e.Id);
 
             // Configure relation to ArrangementVersion
-            HasMany(e => e.Versions).WithRequired(e => e.Arrangement);
+            HasMany(e => e.Versions).WithRequired(e => e.Arrangement).WillCascadeOnDelete();
 
             // Configure relation to Users            
             HasMany(e => e.Users).WithMany(u => u.Arrangements).Map(m => m.MapLeftKey("Arrangement").MapRightKey("User").ToTable("ArrangementUsers"));

@@ -49,7 +49,7 @@ namespace EntityFrameworkTest.Tests.Create
 
                 ArrangementVersion version = versionDao.Add();
                 version.Version = 1;
-                version.Arrangement = arrangement;
+                arrangement.Versions.Add(version);
 
                 ctx.SaveChanges();
             }

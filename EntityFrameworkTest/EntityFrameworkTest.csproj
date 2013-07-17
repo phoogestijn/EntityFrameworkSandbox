@@ -18,7 +18,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -55,11 +55,17 @@
     <Compile Include="Foundation\EF\Configuration\ArrangementConfiguration.cs" />
     <Compile Include="Foundation\EF\Configuration\UserConfiguration.cs" />
     <Compile Include="Foundation\EF\DatabaseContext.cs" />
+    <Compile Include="Foundation\EF\DbObjectContext.cs" />
     <Compile Include="Foundation\EF\Repository\ArrangementRepository.cs" />
     <Compile Include="Foundation\EF\Repository\ArrangementVersionRepository.cs" />
     <Compile Include="Foundation\EF\Repository\IRepository.cs" />
     <Compile Include="Foundation\EF\Repository\Repository.cs" />
     <Compile Include="Foundation\EF\Repository\UserRepository.cs" />
+    <Compile Include="Migrations\201307111127146_InitialCreate.cs" />
+    <Compile Include="Migrations\201307111127146_InitialCreate.Designer.cs">
+      <DependentUpon>201307111127146_InitialCreate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\Arrangement.cs" />
     <Compile Include="Model\ArrangementVersion.cs" />
     <Compile Include="Model\BusinessObject.cs" />
@@ -78,7 +84,11 @@
     </None>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201307111127146_InitialCreate.resx">
+      <DependentUpon>201307111127146_InitialCreate.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
